@@ -5,6 +5,11 @@
 
 #include "detail/x11.hpp"
 
+#ifdef WU_SYSWIN_VULKAN_SUPPORT
+#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_xlib.h>
+#endif
+
 namespace syswin {
 class key_event {
 public:
@@ -91,6 +96,26 @@ public:
     }
   }
 
+#ifdef WU_SYSWIN_VULKAN_SUPPORT
+  /*
+    TODO: functions to support:
+      create_vulkan_surface
+      get_physical_device
+  */
+  VkResult
+  create_vulkan_surface(VkInstance vk_instance,
+                        VkSurfaceKHR *surface) const {
+    VkXlibSurfaceCreateInfoKHR create_info = {
+        .sType =
+            VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
+        .dpy = _display,
+        .window = _window};
+
+    return vkCreateXlibSurfaceKHR(vk_instance, &create_info,
+                                  nullptr, surface);
+  }
+#endif
+
   void show() const noexcept {
     XMapWindow(_display, _window);
   }
@@ -100,7 +125,8 @@ private:
   detail::x11::window _window;
   detail::x11::event _event_buffer;
 
-  template <typename Event> bool _handle_event(auto &&fn) noexcept {
+  template <typename Event>
+  bool _handle_event(auto &&fn) noexcept {
     if (_event_buffer.type == Event::event_id) {
       return fn(Event(_event_buffer));
     }

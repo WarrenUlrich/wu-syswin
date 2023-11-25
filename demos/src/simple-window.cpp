@@ -32,6 +32,12 @@ int main(int argc, char **args) {
         return true;
       });
 
+  VkInstance vk_instance;
+  VkSurfaceKHR* vk_surface;
+
+  auto result = window->create_vulkan_surface(vk_instance, vk_surface);
+  
+  // window->create_vulkan_surface
   // while (1) {
   //   window->poll_event([](const auto &event) {
   //     using event_t = std::decay_t<decltype(event)>;
